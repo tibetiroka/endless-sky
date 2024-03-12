@@ -45,11 +45,11 @@ public:
 	// Finish adding objects (and organize them into the final lookup table).
 	void Finish();
 
-	// Get all collisions for the given projectile. Collisions are not necessarily
+	// Get all possible collisions for the given projectile. Collisions are not necessarily
 	// sorted by distance.
 	const std::vector<Collision> &Line(const Projectile &projectile) const;
 
-	// Get all collisions along a line. Collisions are not necessarily sorted by
+	// Get all possible collisions along a line. Collisions are not necessarily sorted by
 	// distance.
 	const std::vector<Collision> &Line(const Point &from, const Point &to,
 		const Government *pGov = nullptr, const Body *target = nullptr) const;

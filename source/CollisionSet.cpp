@@ -138,7 +138,7 @@ void CollisionSet::Finish()
 
 
 
-// Get all collisions for the given projectile. Collisions are not necessarily
+// Get all possible collisions for the given projectile. Collisions are not necessarily
 // sorted by distance.
 const vector<Collision> &CollisionSet::Line(const Projectile &projectile) const
 {
@@ -153,7 +153,7 @@ const vector<Collision> &CollisionSet::Line(const Projectile &projectile) const
 
 
 
-// Get all collisions along a line. Collisions are not necessarily sorted by
+// Get all possible collisions along a line. Collisions are not necessarily sorted by
 // distance.
 const vector<Collision> &CollisionSet::Line(const Point &from, const Point &to,
 		const Government *pGov, const Body *target) const
