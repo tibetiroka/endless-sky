@@ -33,10 +33,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 // Dummy for std::execution.
-enum class execution
-{
-	seq, par, par_unseq
-};
+namespace exec_handle {
+	enum class execution
+	{
+		seq, par, par_unseq
+	};
+}
 
 
 
@@ -84,9 +86,9 @@ void Parallel::RunBulk(const RandomIt begin, const RandomIt end, Func &&f)
 
 // Dummies for parallel stl functions.
 template<class RandomIt, class Func>
-inline void for_each(execution e, RandomIt begin, RandomIt end, Func &&f)
+inline void for_each(exec_handle::execution e, RandomIt begin, RandomIt end, Func &&f)
 {
-	if(e == execution::seq)
+	if(e == exec_handle::execution::seq)
 		std::for_each(begin, end, f);
 	else
 	{
@@ -98,7 +100,7 @@ inline void for_each(execution e, RandomIt begin, RandomIt end, Func &&f)
 
 
 template<class RandomIt, class Compare>
-inline void sort(execution, RandomIt first, RandomIt last, Compare comp)
+inline void sort(exec_handle::execution, RandomIt first, RandomIt last, Compare comp)
 {
 	std::sort(first, last, comp);
 }
@@ -106,7 +108,7 @@ inline void sort(execution, RandomIt first, RandomIt last, Compare comp)
 
 
 template<class RandomIt>
-inline void sort(execution, RandomIt first, RandomIt last)
+inline void sort(exec_handle::execution, RandomIt first, RandomIt last)
 {
 	std::sort(first, last);
 }
@@ -114,7 +116,7 @@ inline void sort(execution, RandomIt first, RandomIt last)
 
 
 template<class RandomIt, class Compare>
-inline void stable_sort(execution, RandomIt first, RandomIt last, Compare comp)
+inline void stable_sort(exec_handle::execution, RandomIt first, RandomIt last, Compare comp)
 {
 	std::stable_sort(first, last, comp);
 }
@@ -122,13 +124,18 @@ inline void stable_sort(execution, RandomIt first, RandomIt last, Compare comp)
 
 
 template<class RandomIt>
-inline void stable_sort(execution, RandomIt first, RandomIt last)
+inline void stable_sort(exec_handle::execution, RandomIt first, RandomIt last)
 {
 	std::stable_sort(first, last);
 }
 
 #else
 #include <execution>
+
+namespace exec_handle {
+	typedef execution std::execution;
+}
+
 #endif
 
 #endif
