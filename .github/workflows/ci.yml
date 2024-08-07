@@ -137,6 +137,33 @@ jobs:
       run: ctest --preset clang-cl-ci-benchmark
 
 
+
+  build_windows_msvc:
+    name: Windows MSVC
+    needs: changed
+    if: ${{ needs.changed.outputs.game_code == 'true' || needs.changed.outputs.unit_tests == 'true' || needs.changed.outputs.cmake_files == 'true' || needs.changed.outputs.ci_config == 'true' }}
+    runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Setup sccache
+        uses: ./.github/sccache
+      - uses: lukka/get-cmake@latest
+      - uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: '2cf957350da28ad032178a974607f59f961217d9'
+      - uses: lukka/run-cmake@v10
+        with:
+          configurePreset: 'msvc-ci'
+          buildPreset: 'msvc-ci'
+          testPreset: 'msvc-ci'
+      - name: Run Benchmarks
+        run: ctest --preset msvc-ci-benchmark
+
+
   build_macos:
     name: MacOS
     needs: changed
