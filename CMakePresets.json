@@ -149,6 +149,7 @@
       "displayName": "msvc",
       "description": "Builds with MSVC on Windows",
       "inherits": "base",
+      "generator": "Visual Studio 17 2022",
       "toolset": {
         "value": "host=x64",
         "strategy": "external"
