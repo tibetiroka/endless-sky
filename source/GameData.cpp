@@ -690,14 +690,6 @@ const Set<Planet> &GameData::Planets()
 
 
 
-// Playlists for playing in-game music.
-const Set<Playlist> &GameData::Playlists()
-{
-	return objects.playlists;
-}
-
-
-
 const Set<Ship> &GameData::Ships()
 {
 	return objects.ships;

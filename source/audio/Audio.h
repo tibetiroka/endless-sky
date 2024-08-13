@@ -59,7 +59,7 @@ public:
 	// added but deferred because they were added from a thread other than the
 	// main one (the one that called Init()).
 	static void Update(const Point &listenerPosition);
-	static void UpdateMusic(PlayerInfo &player, Track::GameState state);
+	static void UpdateMusic(PlayerInfo &player);
 
 	// Play the given sound, at full volume.
 	static void Play(const Sound *sound);

@@ -562,13 +562,7 @@ void Engine::Step(bool isActive)
 	Audio::Update(center);
 
 	if(GameData::IsLoaded())
-	{
-		Track::GameState state = Track::GameState::IDLE;
-		// If there are hostile ships in the system, set the state to COMBAT.
-		if(hadHostiles)
-			state = Track::GameState::COMBAT;
-		Audio::UpdateMusic(player, state);
-	}
+		Audio::UpdateMusic(player);
 
 
 	// Update the zoom value now that the calculation thread is paused.

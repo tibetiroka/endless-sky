@@ -26,7 +26,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 // The Music class streams mp3 audio from a file and delivers it to the program
-// on "block" at a time, so it never needs to hold the entire decoded file in
+// one "block" at a time, so it never needs to hold the entire decoded file in
 // memory. Each block is 16-bit stereo, 44100 Hz. If no file is specified, or if
 // the decoding thread is not done yet, it returns silence rather than blocking,
 // so the game won't freeze if the music stops for some reason.

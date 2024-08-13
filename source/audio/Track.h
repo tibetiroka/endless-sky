@@ -1,5 +1,5 @@
 /* Track.h
-Copyright (c) 2022 by RisingLeaf
+Copyright (c) 2022 by RisingLeaf, Sam Gleske, tibetiroka
 
 Endless Sky is free software: you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -13,8 +13,11 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef TRACK_H_
-#define TRACK_H_
+#pragma once
+
+#include "../ConditionSet.h"
+#include "../LocationFilter.h"
+#include "../PlayerInfo.h"
 
 #include <map>
 #include <string>
@@ -23,42 +26,34 @@ class DataNode;
 
 
 
-// Class to store a track of music that can be used in a playlist.
+// Class to store a track of music that can be played
+// when the correct conditions are present.
 class Track {
-public:
-	enum GameState
-	{
-		IDLE = 0,
-		COMBAT,
-		LANDED
-	};
-
-
 public:
 	Track() = default;
 
 	// Construct and Load() at the same time.
-	Track(const DataNode &node);
+	explicit Track(const DataNode &node);
 
 	void Load(const DataNode &node);
 
 	const std::string &Name() const;
+	const std::string &Title() const;
 
-	const std::string &GetTitle(GameState state) const;
 	double GetVolumeModifier() const;
 	int Wait() const;
+
+	bool MatchesConditions(const PlayerInfo &player) const;
 
 
 private:
 	std::string name;
 	double volumeModifier = 0.;
-	std::string idleTitle;
-	std::string combatTitle;
-	std::string landedTitle;
+	// The name of the audio file
+	std::string title;
 
 	int wait = 0;
+
+	ConditionSet toPlay;
+	LocationFilter location;
 };
-
-
-
-#endif

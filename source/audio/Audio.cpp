@@ -21,10 +21,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Music.h"
 #include "../Planet.h"
 #include "../PlayerInfo.h"
-#include "Playlist.h"
 #include "../Point.h"
-#include "../Preferences.h"
-#include "../Random.h"
 #include "Sound.h"
 #include "../System.h"
 
@@ -36,8 +33,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <map>
 #include <mutex>
-#include <set>
-#include <stdexcept>
 #include <thread>
 #include <vector>
 
@@ -121,9 +116,7 @@ namespace {
 	// The volume modifier of the current track.
 	double trackVolumeModifier = 0.;
 
-	const Playlist *currentPlaylist = nullptr;
-	const Track *currentPlaylistTrack = nullptr;
-	Track::GameState oldState = Track::GameState::IDLE;
+	const Track *currentAmbientTrack = nullptr;
 
 	chrono::time_point<chrono::high_resolution_clock> onEnd;
 	int currentWait = 0;
@@ -293,19 +286,16 @@ void Audio::Update(const Point &listenerPosition)
 
 
 
-void Audio::UpdateMusic(PlayerInfo &player, Track::GameState state)
+void Audio::UpdateMusic(PlayerInfo &player)
 {
 	if(!isInitialized)
 		return;
 
 	// Music defined by planet or system.
-	if(state == Track::GameState::LANDED)
+	if(player.GetPlanet() && !player.GetPlanet()->MusicName().empty())
 	{
-		if(!player.GetPlanet()->MusicName().empty())
-		{
-			PlayMusic(player.GetPlanet()->MusicName());
-			return;
-		}
+		PlayMusic(player.GetPlanet()->MusicName());
+		return;
 	}
 	else if(player.GetSystem() && !player.GetSystem()->MusicName().empty())
 	{
@@ -314,12 +304,12 @@ void Audio::UpdateMusic(PlayerInfo &player, Track::GameState state)
 	}
 
 	// Wait for the time set by the track.
-	if(currentTrack->IsFinished() && currentPlaylistTrack)
+	if(currentTrack->IsFinished() && currentAmbientTrack)
 	{
-		if(!isWaiting && currentPlaylistTrack->Wait() > 0 && !finishedWaiting)
+		if(!isWaiting && currentAmbientTrack->Wait() > 0 && !finishedWaiting)
 		{
 			isWaiting = true;
-			currentWait = currentPlaylistTrack->Wait();
+			currentWait = currentAmbientTrack->Wait();
 			onEnd = chrono::high_resolution_clock::now();
 		}
 		else if(isWaiting)
@@ -335,64 +325,35 @@ void Audio::UpdateMusic(PlayerInfo &player, Track::GameState state)
 		}
 	}
 
-	// If the current playlist's conditions are not matching anymore, search for a new playlist.
-	bool currentPlaylistValid = currentPlaylist ?
-		currentPlaylist->MatchesConditions(player) : false;
-	// The track has to be updated if the current track is finished or the playlist is not matching
-	// anymore.
-	if(!currentPlaylistValid)
+	// If the current track's conditions are not matching anymore, search for a new one.
+	bool currentTrackValid = currentAmbientTrack && currentAmbientTrack->MatchesConditions(player);
+
+	// The track has to be updated if the current track is finished or it is not matching anymore.
+	if(!currentTrackValid)
 	{
-		// If the current playlist is not valid, find a new one based on priority and weight.
-		WeightedList<const Playlist *> validPlaylists;
-		unsigned priority = 0;
-		for(auto &playlist : GameData::Playlists())
-			if(playlist.second.MatchesConditions(player))
-			{
-				// Higher priorities always win.
-				if(playlist.second.Priority() == priority)
-					validPlaylists.emplace_back(playlist.second.Weight(), &playlist.second);
-				else if(playlist.second.Priority() > priority)
-				{
-					priority = playlist.second.Priority();
-					validPlaylists.clear();
-					validPlaylists.emplace_back(playlist.second.Weight(), &playlist.second);
-				}
-			}
-		if(!validPlaylists.empty())
-		{
-			// This will return a random playlist, with playlist with a higher weight being more
-			// probable to be returned.
-			currentPlaylist = validPlaylists.Get();
-			currentPlaylist->Activate();
-		}
+		WeightedList<const Track *> validTracks;
+
+		for(auto &[name, track] : GameData::Tracks())
+			if(track.MatchesConditions(player))
+				validTracks.emplace_back(1, &track);
+		if(!validTracks.empty())
+			currentAmbientTrack = validTracks.Get();
 		else
-			currentPlaylist = nullptr;
+			currentAmbientTrack = nullptr;
 	}
 
-	// Only switch to a new track if a playlist is set.
-	if(currentPlaylist && (currentTrack->IsFinished() || !currentPlaylistValid))
+	// Only start playing music if a new track is set.
+	if(currentAmbientTrack && (currentTrack->IsFinished() || !currentTrackValid))
 	{
-		currentPlaylistTrack = currentPlaylist->GetNextTrack();
-		if(currentPlaylistTrack)
-		{
-			trackVolumeModifier = currentPlaylistTrack->GetVolumeModifier();
-			SetMusicVolume(musicVolume);
-			PlayMusic(currentPlaylistTrack->GetTitle(state));
-			finishedWaiting = false;
-		}
-		oldState = state;
+		trackVolumeModifier = currentAmbientTrack->GetVolumeModifier();
+		SetMusicVolume(musicVolume);
+		PlayMusic(currentAmbientTrack->Title());
+		finishedWaiting = false;
 	}
-	// If no playlist is set this means nothing should be played, so stop
+	// If no track is set this means nothing should be played, so stop
 	// everything and fade out.
-	else
+	else if(!currentAmbientTrack)
 		PlayMusic("");
-
-	if(oldState != state)
-	{
-		oldState = state;
-		if(currentPlaylistTrack)
-			PlayMusic(currentPlaylistTrack->GetTitle(state));
-	}
 }
 
 

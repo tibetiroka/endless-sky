@@ -1,5 +1,5 @@
 /* Track.cpp
-Copyright (c) 2022 by RisingLeaf
+Copyright (c) 2022 by RisingLeaf, Sam Gleske, tibetiroka
 
 Endless Sky is free software: you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -46,14 +46,14 @@ void Track::Load(const DataNode &node)
 		bool hasValue = child.Size() >= 2;
 		if(key == "volume" && hasValue)
 			volumeModifier = clamp<double>(child.Value(1), -1., 1.);
-		else if(key == "idle" && hasValue)
-			idleTitle = child.Token(1);
-		else if(key == "combat" && hasValue)
-			combatTitle = child.Token(1);
-		else if(key == "landed" && hasValue)
-			landedTitle = child.Token(1);
+		else if(key == "music" && hasValue)
+			title = child.Token(1);
 		else if(key == "wait" && hasValue)
 			wait = max<int>(0, child.Value(1));
+		else if(hasValue && key == "to" && child.Token(1) == "play")
+			toPlay.Load(child);
+		else if(key == "location")
+			location.Load(child);
 		else
 			child.PrintTrace("Skipping unrecognized attribute:");
 	}
@@ -68,18 +68,9 @@ const string &Track::Name() const
 
 
 
-const string &Track::GetTitle(GameState state) const
+const string &Track::Title() const
 {
-	switch(state)
-	{
-		case GameState::COMBAT:
-			return combatTitle;
-		case GameState::LANDED:
-			return landedTitle;
-		case GameState::IDLE:
-		default:
-			return idleTitle;
-	}
+	return title;
 }
 
 
@@ -94,4 +85,13 @@ double Track::GetVolumeModifier() const
 int Track::Wait() const
 {
 	return wait;
+}
+
+
+
+bool Track::MatchesConditions(const PlayerInfo &player) const
+{
+	if(player.GetPlanet() && !location.Matches(player.GetPlanet()))
+		return false;
+	return toPlay.Test(player.Conditions()) && location.Matches(player.GetSystem());
 }
