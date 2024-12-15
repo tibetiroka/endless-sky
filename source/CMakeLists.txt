@@ -323,6 +323,13 @@ target_sources(EndlessSkyLib PRIVATE
 	opengl.h
 	pi.h
 	shift.h
+	attribute/Attribute.cpp
+	attribute/Attribute.h
+	attribute/AttributeStore.cpp
+	attribute/AttributeStore.h
+	attribute/AttributeCategory.h
+	attribute/AttributeEffect.h
+	attribute/Modifier.h
 	audio/Audio.cpp
 	audio/Audio.h
 	audio/Music.cpp
