@@ -515,6 +515,10 @@ private:
 	void DoPassiveEffects(std::vector<Visual> &visuals, std::list<std::shared_ptr<Flotsam>> &flotsam);
 	void DoJettison(std::list<std::shared_ptr<Flotsam>> &flotsam);
 	void DoCloakDecision();
+	/// Helper function to reduce a given status effect according
+	/// to its resistance, limited by how much energy, fuel, heat etc. are available.
+	/// Updates the stat and the energy, fuel, heat etc. amounts.
+	void DoStatusEffect(AttributeEffect baseEffect);
 	// Step hyperspace enter/exit logic. Returns true if ship is hyperspacing in or out.
 	bool DoHyperspaceLogic(std::vector<Visual> &visuals);
 	// Step landing logic. Returns true if the ship is landing or departing.
@@ -634,6 +638,7 @@ private:
 	std::vector<EnginePoint> steeringEnginePoints;
 	Armament armament;
 
+	AttributeStore 
 	// Various energy levels:
 	double shields = 0.;
 	double hull = 0.;

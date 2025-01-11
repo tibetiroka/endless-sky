@@ -17,7 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 /// Defines groupings for attributes. Many of these are situations when outfit effects are applied to a ship.
 /// Categories can also be combined with an effect (categoryEffect in Attribute). This is primarily used for RESISTANCE, where
 /// categories such as "burn resistance" are created this way.
-enum AttributeCategory : uint8_t {
+enum class AttributeCategory : uint8_t {
 	// These categories have matching default effects.
 	SHIELD_GENERATION,
 	HULL_REPAIR,

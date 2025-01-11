@@ -69,10 +69,6 @@ public:
 	// Get the image to display in the outfitter when buying this item.
 	const Sprite *Thumbnail() const;
 
-	double Get(const char *attribute) const;
-	double Get(const std::string &attribute) const;
-	const Dictionary &Attributes() const;
-
 	// Determine whether the given number of instances of the given outfit can
 	// be added to a ship with the attributes represented by this instance. If
 	// not, return the maximum number that can be added.
@@ -82,9 +78,6 @@ public:
 	void Add(const Outfit &other, int count = 1);
 	// Add the licenses required by the given outfit to this outfit.
 	void AddLicenses(const Outfit &outfit);
-	// Modify this outfit's attributes. Note that this cannot be used to change
-	// special attributes, like cost and mass.
-	void Set(const char *attribute, double value);
 
 	// Get this outfit's engine flare sprites, if any.
 	const std::vector<std::pair<Body, int>> &FlareSprites() const;
@@ -131,8 +124,6 @@ private:
 	double mass = 0.;
 	// Licenses needed to purchase this item.
 	std::vector<std::string> licenses;
-
-	Dictionary attributes;
 
 	// The integers in these pairs/maps indicate the number of
 	// sprites/effects/sounds to be placed/played.

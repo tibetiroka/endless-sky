@@ -14,8 +14,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <cstdint>
 
-// The different effects of an attribute.
-enum AttributeEffect : uint8_t {
+/// The different effects of an attribute.
+enum class AttributeEffect : uint8_t {
 	// These attributes have matching categories (e.g. SHIELD_GENERATION -> SHIELDS).
 	// Those categories have these effects as their default effect.
 	SHIELDS,
@@ -36,5 +36,5 @@ enum AttributeEffect : uint8_t {
 	DISABLED,
 	MINABLE,
 	PIERCING,
-	ATTRIBUTE_EFFECT_COUNT
+	ATTRIBUTE_EFFECT_COUNT ///< Also used to signal "no category effect" for categories
 };

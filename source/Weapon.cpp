@@ -561,6 +561,50 @@ const pair<double, double> &Weapon::DropoffRanges() const
 
 
 
+double Weapon::Get(const char *attribute) const
+{
+	return attributes.Get(attribute);
+}
+
+
+
+double Weapon::Get(const std::string &attribute) const
+{
+	return attributes.Get(attribute);
+}
+
+
+
+double Weapon::Get(Attribute attribute) const
+{
+	return attributes.Get(attribute);
+}
+
+
+
+/// Modify this weapon's attributes. Note that this cannot be used to change
+/// special attributes, like cost and mass.
+void Weapon::Set(const char *attribute, double value)
+{
+	attributes.Set(attribute, value);
+}
+
+
+
+void Weapon::Set(Attribute attribute, double value)
+{
+	attributes.Set(attribute, value);
+}
+
+
+
+const AttributeStore &Weapon::Attributes() const
+{
+	return attributes;
+}
+
+
+
 // Legacy support: allow turret outfits with no turn rate to specify a
 // default turnrate.
 void Weapon::SetTurretTurn(double rate)
@@ -570,19 +614,20 @@ void Weapon::SetTurretTurn(double rate)
 
 
 
-double Weapon::TotalDamage(int index) const
+double Weapon::TotalDamage(AttributeEffect effect, Modifier modifier) const
 {
 	if(!calculatedDamage)
 	{
 		calculatedDamage = true;
-		for(int i = 0; i < DAMAGE_TYPES; ++i)
+		for(int i = 0; i < ATTRIBUTE_EFFECT_COUNT; ++i)
 		{
+			Attribute a{DAMAGE, static_cast<AttributeEffect>(i)};
 			for(const auto &it : submunitions)
-				damage[i] += it.weapon->TotalDamage(i) * it.count;
-			doesDamage |= (damage[i] > 0.);
+				attributes.Add(a, it.weapon->attributes.Get(a) * it.count);
+			doesDamage |= (attributes.Get(a) > 0.);
 		}
 	}
-	return damage[index];
+	return attributes.Get({DAMAGE, effect, modifier});
 }
 
 

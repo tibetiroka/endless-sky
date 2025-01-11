@@ -130,42 +130,6 @@ namespace {
 		}
 	}
 
-	// Helper function to reduce a given status effect according
-	// to its resistance, limited by how much energy, fuel, and heat are available.
-	// Updates the stat and the energy, fuel, and heat amounts.
-	void DoStatusEffect(bool isDeactivated, double &stat, double resistance, double &energy, double energyCost,
-		double &fuel, double fuelCost, double &heat, double heatCost)
-	{
-		if(isDeactivated || resistance <= 0.)
-		{
-			stat = max(0., .99 * stat);
-			return;
-		}
-
-		// Calculate how much resistance can be used assuming no
-		// energy or fuel cost.
-		resistance = .99 * stat - max(0., .99 * stat - resistance);
-
-		// Limit the resistance by the available energy, heat, and fuel.
-		if(energyCost > 0.)
-			resistance = min(resistance, energy / energyCost);
-		if(fuelCost > 0.)
-			resistance = min(resistance, fuel / fuelCost);
-		if(heatCost < 0.)
-			resistance = min(resistance, heat / -heatCost);
-
-		// Update the stat, energy, heat, and fuel given how much resistance is being used.
-		if(resistance > 0.)
-		{
-			stat = max(0., .99 * stat - resistance);
-			energy -= resistance * energyCost;
-			fuel -= resistance * fuelCost;
-			heat += resistance * heatCost;
-		}
-		else
-			stat = max(0., .99 * stat);
-	}
-
 	// Get an overview of how many weapon-outfits are equipped.
 	map<const Outfit *, int> GetEquipped(const vector<Hardpoint> &weapons)
 	{
@@ -630,7 +594,7 @@ void Ship::FinishLoading(bool isNewInstance)
 			reinterpret_cast<Body &>(*this) = *base;
 		if(customSwizzle == -1)
 			customSwizzle = base->CustomSwizzle();
-		if(baseAttributes.Attributes().empty())
+		if(baseAttributes.Attributes().Empty())
 			baseAttributes = base->baseAttributes;
 		if(bays.empty() && !base->bays.empty() && !removeBays)
 			bays = base->bays;
@@ -4073,6 +4037,14 @@ void Ship::DoGeneration()
 	fuel -= leakage;
 	heat += burning;
 	// TODO: Mothership gives status resistance to carried ships?
+	for(AttributeEffect effect : Attribute::EFFECTS)
+	{
+		double currentEffect = attributes.Get({PASSIVE, effect, Modifier::OVER_TIME});
+		if(currentEffect)
+		{
+			attributes.Attributes().Add
+		}
+	}
 	if(ionization)
 	{
 		double ionResistance = attributes.Get("ion resistance");
@@ -4336,6 +4308,52 @@ void Ship::DoCloakDecision()
 	}
 	else
 		cloak = 0.;
+}
+
+
+
+/// Helper function to reduce a given status effect according
+/// to its resistance, limited by how much energy, fuel, heat etc. are available.
+/// Updates the stat and the energy, fuel, heat etc. amounts.
+void Ship::DoStatusEffect(AttributeEffect baseEffect)
+{
+	double resistance = attributes.Get({RESISTANCE, baseEffect, Modifier::OVER_TIME, baseEffect, Modifier::OVER_TIME});
+	double stat = attributes.Get({PASSIVE, baseEffect});
+
+	if(isDisabled || resistance <= 0.)
+	{
+		stat = max(0., .99 * stat);
+		attributes.Set({PASSIVE, baseEffect}, stat);
+		return;
+	}
+
+	double fuelCost = attributes.Get({RESISTANCE, baseEffect, Modifier::OVER_TIME, FUEL});
+	double heatCost = attributes.Get({RESISTANCE, baseEffect, Modifier::OVER_TIME, HEAT});
+	double energyCost = attributes.Get({RESISTANCE, baseEffect, Modifier::OVER_TIME, ENERGY});
+
+	// Calculate how much resistance can be used assuming no
+	// energy or fuel cost.
+	resistance = .99 * stat - max(0., .99 * stat - resistance);
+
+	// Limit the resistance by the available cost values.
+	if(energyCost > 0.)
+		resistance = min(resistance, energy / energyCost);
+	if(fuelCost > 0.)
+		resistance = min(resistance, fuel / fuelCost);
+	if(heatCost < 0.)
+		resistance = min(resistance, heat / -heatCost);
+
+	// Update the stat, energy, heat, and fuel given how much resistance is being used.
+	if(resistance > 0.)
+	{
+		stat = max(0., .99 * stat - resistance);
+		energy -= resistance * energyCost;
+		fuel -= resistance * fuelCost;
+		heat += resistance * heatCost;
+	}
+	else
+		stat = max(0., .99 * stat);
+	attributes.Set({PASSIVE, baseEffect}, stat);
 }
 
 

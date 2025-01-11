@@ -581,14 +581,6 @@ void Outfit::AddLicenses(const Outfit &other)
 
 
 
-// Modify this outfit's attributes.
-void Outfit::Set(const char *attribute, double value)
-{
-	attributes[attribute] = value;
-}
-
-
-
 // Get this outfit's engine flare sprite, if any.
 const vector<pair<Body, int>> &Outfit::FlareSprites() const
 {

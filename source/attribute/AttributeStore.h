@@ -13,29 +13,56 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 #include "Attribute.h"
+#include "../DataNode.h"
+#include "../DataWriter.h"
 #include "../Dictionary.h"
 
+#include <functional>
 #include <utility>
+#include <variant>
 #include <vector>
 
 class AttributeStore {
+	/// Performance-sensitive calls in Ship get low level access.
+	friend class Ship;
 public:
-	// Gets the value of the specified attribute, or 0 if not present.
+	/// Gets the value of the specified attribute, or 0 if not present.
 	double Get(const std::string &attribute) const;
+	double Get(Attribute attribute) const;
 
-	// Sets the value of the specified attribute. If the attribute is not present, it is added to this collection
-	// with this value.
+	/// Sets the value of the specified attribute. If the attribute is not present, it is added to this collection
+	/// with this value.
 	void Set(const std::string &attribute, double value);
+	void Set(Attribute attribute, double value);
 
-	// Checks whether there are any attributes stored here.
+	/// Checks whether there are any attributes stored here.
 	bool Empty() const;
+
+	/// Loads data from the data node. This function can be called multiple times on an instance.
+	void Load(const DataNode &node);
+	/// Writes the attributes into the data writer.
+	void Save(DataWriter &writer) const;
+
+	/// Determine whether the given number of instances of the attributes can
+	/// be added to this instance. If not, return the maximum number that can be added.
+	int CanAdd(const AttributeStore &other, int count) const;
+	/// Adds every attribute from the given AttributeStore to this AttributeStore the specified number of times.
+	void Add(const AttributeStore &other, int count);
+	/// Adds to the value of an attribute.
+	void Add(Attribute attribute, double value);
+
+	/// Calls the given function on all attributes.
+	void ForEach(const std::function<void(const std::variant<std::string, Attribute> &, double)> &function) const;
+
+
+private:
+	static double GetMinimum(const std::string &attribute);
+	static double GetMinimum(Attribute attribute);
 
 
 private:
 	// Generic attributes that can be anything.
 	Dictionary textAttributes;
-	// Attributes that 
+	// Attributes that
 	std::vector<std::pair<Attribute, double>> categorizedAttributes;
-	std::vector<std::pair<Attribute, double>> resistanceAttributes;
-	std::vector<std::pair<Attribute, double>> protectionAttributes;
 };

@@ -24,5 +24,5 @@ enum class Modifier : uint8_t {
 	MULTIPLIER,
 	RELATIVE,
 	OVER_TIME,
-	MODIFIER_COUNT
+	DELAYED
 };
