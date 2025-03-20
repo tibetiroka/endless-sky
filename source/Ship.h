@@ -638,7 +638,6 @@ private:
 	std::vector<EnginePoint> steeringEnginePoints;
 	Armament armament;
 
-	AttributeStore 
 	// Various energy levels:
 	double shields = 0.;
 	double hull = 0.;

@@ -963,9 +963,7 @@ void Ship::Save(DataWriter &out) const
 			for(const auto &it : baseAttributes.OutfitScanSounds())
 				for(int i = 0; i < it.second; ++i)
 					out.Write("outfit scan sound", it.first->Name());
-			for(const auto &it : baseAttributes.Attributes())
-				if(it.second)
-					out.Write(it.first, it.second);
+			baseAttributes.Attributes().Save(out);
 		}
 		out.EndChild();
 
@@ -4042,87 +4040,8 @@ void Ship::DoGeneration()
 		double currentEffect = attributes.Get({PASSIVE, effect, Modifier::OVER_TIME});
 		if(currentEffect)
 		{
-			attributes.Attributes().Add
+			DoStatusEffect(effect);
 		}
-	}
-	if(ionization)
-	{
-		double ionResistance = attributes.Get("ion resistance");
-		double ionEnergy = attributes.Get("ion resistance energy") / ionResistance;
-		double ionFuel = attributes.Get("ion resistance fuel") / ionResistance;
-		double ionHeat = attributes.Get("ion resistance heat") / ionResistance;
-		DoStatusEffect(isDisabled, ionization, ionResistance,
-			energy, ionEnergy, fuel, ionFuel, heat, ionHeat);
-	}
-
-	if(scrambling)
-	{
-		double scramblingResistance = attributes.Get("scramble resistance");
-		double scramblingEnergy = attributes.Get("scramble resistance energy") / scramblingResistance;
-		double scramblingFuel = attributes.Get("scramble resistance fuel") / scramblingResistance;
-		double scramblingHeat = attributes.Get("scramble resistance heat") / scramblingResistance;
-		DoStatusEffect(isDisabled, scrambling, scramblingResistance,
-			energy, scramblingEnergy, fuel, scramblingFuel, heat, scramblingHeat);
-	}
-
-	if(disruption)
-	{
-		double disruptionResistance = attributes.Get("disruption resistance");
-		double disruptionEnergy = attributes.Get("disruption resistance energy") / disruptionResistance;
-		double disruptionFuel = attributes.Get("disruption resistance fuel") / disruptionResistance;
-		double disruptionHeat = attributes.Get("disruption resistance heat") / disruptionResistance;
-		DoStatusEffect(isDisabled, disruption, disruptionResistance,
-			energy, disruptionEnergy, fuel, disruptionFuel, heat, disruptionHeat);
-	}
-
-	if(slowness)
-	{
-		double slowingResistance = attributes.Get("slowing resistance");
-		double slowingEnergy = attributes.Get("slowing resistance energy") / slowingResistance;
-		double slowingFuel = attributes.Get("slowing resistance fuel") / slowingResistance;
-		double slowingHeat = attributes.Get("slowing resistance heat") / slowingResistance;
-		DoStatusEffect(isDisabled, slowness, slowingResistance,
-			energy, slowingEnergy, fuel, slowingFuel, heat, slowingHeat);
-	}
-
-	if(discharge)
-	{
-		double dischargeResistance = attributes.Get("discharge resistance");
-		double dischargeEnergy = attributes.Get("discharge resistance energy") / dischargeResistance;
-		double dischargeFuel = attributes.Get("discharge resistance fuel") / dischargeResistance;
-		double dischargeHeat = attributes.Get("discharge resistance heat") / dischargeResistance;
-		DoStatusEffect(isDisabled, discharge, dischargeResistance,
-			energy, dischargeEnergy, fuel, dischargeFuel, heat, dischargeHeat);
-	}
-
-	if(corrosion)
-	{
-		double corrosionResistance = attributes.Get("corrosion resistance");
-		double corrosionEnergy = attributes.Get("corrosion resistance energy") / corrosionResistance;
-		double corrosionFuel = attributes.Get("corrosion resistance fuel") / corrosionResistance;
-		double corrosionHeat = attributes.Get("corrosion resistance heat") / corrosionResistance;
-		DoStatusEffect(isDisabled, corrosion, corrosionResistance,
-			energy, corrosionEnergy, fuel, corrosionFuel, heat, corrosionHeat);
-	}
-
-	if(leakage)
-	{
-		double leakResistance = attributes.Get("leak resistance");
-		double leakEnergy = attributes.Get("leak resistance energy") / leakResistance;
-		double leakFuel = attributes.Get("leak resistance fuel") / leakResistance;
-		double leakHeat = attributes.Get("leak resistance heat") / leakResistance;
-		DoStatusEffect(isDisabled, leakage, leakResistance,
-			energy, leakEnergy, fuel, leakFuel, heat, leakHeat);
-	}
-
-	if(burning)
-	{
-		double burnResistance = attributes.Get("burn resistance");
-		double burnEnergy = attributes.Get("burn resistance energy") / burnResistance;
-		double burnFuel = attributes.Get("burn resistance fuel") / burnResistance;
-		double burnHeat = attributes.Get("burn resistance heat") / burnResistance;
-		DoStatusEffect(isDisabled, burning, burnResistance,
-			energy, burnEnergy, fuel, burnFuel, heat, burnHeat);
 	}
 
 	// When ships recharge, what actually happens is that they can exceed their

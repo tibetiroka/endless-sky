@@ -20,11 +20,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 namespace {
-	const double EPS = 0.0000000001;
-
-	const map<string, Attribute> ATTRIBUTE_MAPPINGS = {
+	/*const map<string, Attribute> ATTRIBUTE_MAPPINGS = {
 			{"hull threshold", 0}
-	};
+	};*/
 }
 
 

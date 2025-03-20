@@ -53,6 +53,19 @@ namespace {
 		}
 		return false;
 	}
+	bool SetsIntersect(const AttributeStore &a, const AttributeStore &b)
+	{
+		// todo: optimize
+		bool found = false;
+		a.ForEach([&](const auto &variant, double value)
+		{
+			if(variant.index())
+				found |= b.Get(std::get<1>(variant)) > AttributeStore::EPS;
+			else
+				found |= b.Get(std::get<0>(variant)) > AttributeStore::EPS;
+		});
+		return found;
+	}
 	bool SetsIntersect(const set<const Outfit *> &a, const set<const Outfit *> &b)
 	{
 		auto ait = a.begin();
@@ -393,10 +406,14 @@ bool LocationFilter::Matches(const Ship &ship) const
 	if(!attributes.empty())
 	{
 		// Create a set from the positive-valued attributes of this ship.
-		set<string> shipAttributes;
-		for(const auto &attr : ship.Attributes().Attributes())
-			if(attr.second > 0.)
-				shipAttributes.insert(shipAttributes.end(), attr.first);
+		AttributeStore shipAttributes;
+		ship.Attributes().Attributes().ForEach([&](const auto &variant, double value)
+		{
+			if(value > 0.)
+				shipAttributes.Set(std::get<1>(variant), value);
+			else
+				shipAttributes.Set(std::get<1>(variant), value);
+		});
 		for(const set<string> &attr : attributes)
 			if(!SetsIntersect(attr, shipAttributes))
 				return false;

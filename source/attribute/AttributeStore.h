@@ -41,7 +41,7 @@ public:
 	/// Loads data from the data node. This function can be called multiple times on an instance.
 	void Load(const DataNode &node);
 	/// Writes the attributes into the data writer.
-	void Save(DataWriter &writer) const;
+	void Save(DataWriter &writer) const{}
 
 	/// Determine whether the given number of instances of the attributes can
 	/// be added to this instance. If not, return the maximum number that can be added.
@@ -54,15 +54,18 @@ public:
 	/// Calls the given function on all attributes.
 	void ForEach(const std::function<void(const std::variant<std::string, Attribute> &, double)> &function) const;
 
-
 private:
 	static double GetMinimum(const std::string &attribute);
 	static double GetMinimum(Attribute attribute);
 
 
+public:
+	constexpr static double EPS = 0.0000000001;
+
+
 private:
-	// Generic attributes that can be anything.
+	/// Generic attributes that can be anything.
 	Dictionary textAttributes;
-	// Attributes that
+	/// Categorized attributes and their values, sorted by the attribute.
 	std::vector<std::pair<Attribute, double>> categorizedAttributes;
 };
