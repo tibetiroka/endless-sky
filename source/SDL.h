@@ -30,6 +30,9 @@ using mouse_pos_t = float;
 #ifndef SDL_HINT_VIDEODRIVER
 #define SDL_HINT_VIDEODRIVER SDL_HINT_VIDEO_DRIVER
 #endif
+#ifndef SDL_HINT_WINDOWS_DPI_AWARENESS
+#define SDL_HINT_WINDOWS_DPI_AWARENESS "SDL_WINDOWS_DPI_AWARENESS"
+#endif
 
 // These are defined to warn you about small api changes, not relevant for us
 #ifdef SDL_WINDOW_FULLSCREEN_DESKTOP
