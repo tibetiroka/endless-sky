@@ -19,7 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "WinVersion.h"
 
 #ifdef ES_USE_SDL3
-#include "SDL.h"
+#include "../SDL.h"
 #else
 #include <SDL2/SDL_syswm.h>
 #endif
