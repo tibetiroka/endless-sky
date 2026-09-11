@@ -83,7 +83,7 @@ LoadPanel::LoadPanel(PlayerInfo &player, UI &gamePanels)
 	pilotBox(GameData::Interfaces().Get("load menu")->GetBox("pilots")),
 	snapshotBox(GameData::Interfaces().Get("load menu")->GetBox("snapshots")),
 	tooltip(200, Alignment::LEFT, Tooltip::Direction::DOWN_LEFT, Tooltip::Corner::TOP_LEFT,
-		GameData::Colors().Get("tooltip background"), GameData::Colors().Get("medium"))
+		GameData::Colors().Get("tooltip background"), GameData::Colors().Get("medium"), true)
 {
 	// If you have a player loaded, and the player is on a planet, make sure
 	// the player is saved so that any snapshot you create will be of the
@@ -200,7 +200,7 @@ void LoadPanel::Draw()
 			if(drawPoint.Y() > bottom - fadeOut)
 				continue;
 
-			Rectangle zone(drawPoint + Point(snapshotBox.Width() / 2., 10.), Point(snapshotBox.Width(), 20.));
+			Rectangle zone(drawPoint + Point(snapshotBox.Width() / 2., 10.), Point(snapshotBox.Width(), 19.9));
 			const Point textPoint(drawPoint.X() + hTextPad, zone.Center().Y() - font.Height() / 2);
 			bool isHovering = (hasHover && zone.Contains(hoverPoint));
 			bool isHighlighted = (file == selectedFile || isHovering);
@@ -210,7 +210,12 @@ void LoadPanel::Draw()
 				tooltip.IncrementCount();
 				if(tooltip.ShouldDraw())
 				{
-					tooltip.SetText(Format::TimestampString(time), true);
+					if(hoverFile != file)
+					{
+						hoverFile = file;
+						hoverFileTimestamp = Format::TimestampString(time);
+					}
+					tooltip.SetText(hoverFileTimestamp);
 					tooltip.SetZone(zone);
 				}
 			}
@@ -244,6 +249,13 @@ void LoadPanel::UpdateTooltipActivation()
 
 
 
+void LoadPanel::UpdateTextDisplay()
+{
+	tooltip.UpdateFontSize();
+}
+
+
+
 bool LoadPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress)
 {
 	UI::UISound sound = UI::UISound::NORMAL;
@@ -272,7 +284,8 @@ bool LoadPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 		sound = UI::UISound::NONE;
 		nameToConfirm.clear();
 		filesystem::path lastSave = Files::Saves() / selectedPilot->Files().front().first;
-		GetUI().Push(DialogPanel::RequestString(this, &LoadPanel::SnapshotCallback,
+		GetUI().Push(DialogPanel::RequestStringWithCharFilter(this, &LoadPanel::SnapshotCallback,
+			[this](const string &input, char ch) { return LoadPanel::SnapshotNameFilter(input, ch); },
 			"Enter a name for this snapshot, or use the most recent save's date:",
 			FileDate(lastSave)));
 	}
@@ -508,13 +521,35 @@ void LoadPanel::UpdateLists()
 
 
 
+optional<filesystem::path> LoadPanel::SnapshotPathBase() const
+{
+	if(!selectedPilot || selectedPilot->Files().empty() || selectedPilot->Files().front().first.size() < 4)
+		return nullopt;
+
+	return Files::Saves() / selectedPilot->Files().front().first;
+}
+
+
+
+bool LoadPanel::SnapshotNameFilter(const string &input, char ch)
+{
+	optional<filesystem::path> base = SnapshotPathBase();
+	if(!base.has_value())
+		return false;
+
+	return Files::IsValidCharacter(ch) && Files::MaxFilenameLength(*base) > input.size() + 6;
+}
+
+
+
 // Snapshot name callback.
 void LoadPanel::SnapshotCallback(const string &name)
 {
-	if(!selectedPilot || selectedPilot->Files().empty() || selectedPilot->Files().front().first.size() < 4)
+	optional<filesystem::path> fromOpt = SnapshotPathBase();
+	if(!fromOpt.has_value())
 		return;
+	filesystem::path from = *fromOpt;
 
-	filesystem::path from = Files::Saves() / selectedPilot->Files().front().first;
 	string suffix = name.empty() ? FileDate(from) : name;
 	string extension = "~" + suffix + ".txt";
 
